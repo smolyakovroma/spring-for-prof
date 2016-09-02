@@ -128,6 +128,9 @@ public class PlainContactDao implements ContactDao {
 
     }
 
+    @Override
+    public void insertWithDetail(Contact contact) {
 
+    }
 }
 

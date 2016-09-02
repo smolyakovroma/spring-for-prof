@@ -8,12 +8,12 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import prospring.beans.Contact;
 import prospring.beans.ContactTelDetail;
-import prospring.dao.ImplSpringSQL.SelectAllContacts;
-import prospring.dao.ImplSpringSQL.SelectContactByFirstName;
-import prospring.dao.ImplSpringSQL.UpdateContact;
+import prospring.dao.ImplSpringSQL.*;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
@@ -34,6 +34,9 @@ public class JdbcContactDao implements ContactDao, InitializingBean {
     private SelectAllContacts selectAllContacts;
     private SelectContactByFirstName selectContactByFirstName;
     private UpdateContact updateContact;
+    private InsertContact insertContact;
+    private InsertContactTelDetail insertContactTelDetail;
+    private StoredFunctionFirstNameByid storedFunctionFirstNameByid;
 
     private Log LOG = LogFactory.getLog(JdbcContactDao.class);
 
@@ -46,6 +49,9 @@ public class JdbcContactDao implements ContactDao, InitializingBean {
         this.selectAllContacts = new SelectAllContacts(dataSource);
         this.selectContactByFirstName = new SelectContactByFirstName(dataSource);
         this.updateContact = new UpdateContact(dataSource);
+        this.insertContact = new InsertContact(dataSource);
+        this.insertContactTelDetail = new InsertContactTelDetail(dataSource);
+        this.storedFunctionFirstNameByid = new StoredFunctionFirstNameByid(dataSource);
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 
@@ -90,17 +96,45 @@ public class JdbcContactDao implements ContactDao, InitializingBean {
     @Override
     public String findFirstNameById(Long id) {
 
-        String sql = "select first_name from contact where id=:id";
-        Map<String, Object> namedParameters = new HashMap<>();
-        namedParameters.put("id", id);
-
-        return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, String.class);
+        List<String> result = storedFunctionFirstNameByid.execute(id);
+        return result.get(0);
 
     }
 
     @Override
     public void insert(Contact contact) {
+        Map<String, Object> paramÌap = new HashMap<String, Object>();
+        paramÌap.put("first_name", contact.getFirstName());
+        paramÌap.put("last_name", contact.getLastName());
+        paramÌap.put("birth_date", contact.getBirthDate());
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        insertContact.updateByNamedParam(paramÌap, keyHolder);
+        contact.setId(keyHolder.getKey().longValue());
+        LOG.info("New contact inserted with id: " + contact.getId());
+    }
 
+    @Override
+    public void insertWithDetail(Contact contact) {
+        insertContactTelDetail = new InsertContactTelDetail(dataSource);
+        Map<String, Object> paramÌap = new HashMap<String, Object>();
+        paramÌap.put("first_name", contact.getFirstName());
+        paramÌap.put("last_name", contact.getLastName());
+        paramÌap.put("birth_date", contact.getBirthDate());
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        insertContact.updateByNamedParam(paramÌap, keyHolder);
+        contact.setId(keyHolder.getKey().longValue());
+        LOG.info("New contact inserted wi th id: " + contact.getId());
+        List<ContactTelDetail> contactTelDetails = contact.getContactTelDetails();
+        if (contactTelDetails != null) {
+            for (ContactTelDetail contactTelDetail : contactTelDetails) {
+                paramÌap = new HashMap<String, Object>();
+                paramÌap.put("contact_id", contact.getId());
+                paramÌap.put("tel_type", contactTelDetail.getTelType());
+                paramÌap.put("tel_number", contactTelDetail.getTelNumber());
+                insertContactTelDetail.updateByNamedParam(paramÌap);
+                insertContactTelDetail.flush();
+            }
+        }
     }
 
     @Override

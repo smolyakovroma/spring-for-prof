@@ -6,6 +6,7 @@ import prospring.beans.ContactTelDetail;
 import prospring.dao.ContactDao;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 
@@ -17,16 +18,36 @@ public class JdbcContactDaoSample {
 
         ContactDao contactDao = ctx.getBean("contactDao", ContactDao.class);
 
-        Contact contact = new Contact();
-        contact.setId(1l);
-        contact.setFirstName("Chris");
-        contact.setLastName("Johnos");
-        contact.setBirthDate(new Date(
-                (new GregorianCalendar(1977, 0, 4)).getTime().getTime()));
-        contactDao.update(contact);
+//        Contact contact = new Contact();
+//        contact.setFirstName ("Rod");
+//        contact.setLastName("Johnson");
+//        contact.setBirthDate(new Date((new GregorianCalendar(2001, 10, 1))
+//                .getTime().getTime()));
+//        contactDao.insert(contact);
+//
+//        List<Contact> contacts = contactDao.findAll();
 
-        List<Contact> contacts = contactDao.findAll();
-        listContact(contacts);
+//        Contact contact = new Contact();
+//        contact.setFirstName("Michael");
+//        contact. setLastName ( "Jackson") ;
+//        contact.setBirthDate(new Date((new GregorianCalendar(1964, 10, 1))
+//                .getTime() .getTime()) );
+//        List<ContactTelDetail> contactTelDetails = new ArrayList<ContactTelDetail>();
+//        ContactTelDetail contactTelDetail = new ContactTelDetail();
+//        contactTelDetail.setTelType("Home");
+//        contactTelDetail.setTelNumber("11111111");
+//        contactTelDetails.add(contactTelDetail);
+//        contactTelDetail = new ContactTelDetail();
+//        contactTelDetail.setTelType("Mobile");
+//        contactTelDetail.setTelNumber("22222222");
+//        contactTelDetails.add(contactTelDetail);
+//        contact.setContactTelDetails(contactTelDetails);
+//        contactDao.insertWithDetail(contact);
+//        listContact(contactDao.findAllWithDetail());
+
+        System.out.println(contactDao.findFirstNameById(1L));
+
+
     }
 
     private static void listContact(List<Contact> contacts) {
